@@ -7,19 +7,11 @@ launching a command.
 Usage
 -----
 
-Just add the following in your .xinitrc (if you are not using Gentoo) or other configuration file used to start your WM. Start `hotkey` with **&** at the end (**hotkey /dev/input/event5 &**)
-
 ```bash
-sudo hotkey /dev/input/event5
-# To get the hex code behind the keyboard input one
-sudo printev /dev/input/event5
+while true; do
+  sudo 0verhotkey++
+done
 ```
-
-Dependencies
-------------
-
-Hotkey depends on Linux configured with `INPUT_EVDEV` and a computer with a
-keyboard.
 
 Configuration
 -------------
@@ -27,20 +19,6 @@ Configuration
 Edit the `hotkey.c` file to your heart's desire. It contains a few examples and
 an explanation of what the options mean. The configuration gets compiled into
 the binary, which keeps the code simple and makes startup quick and secure.
-
-Use the included printev program to see what values to put in the config file.
-
-OpenRC support
---------------
-
-Hotkey ships with an OpenRC init script. If you don't use OpenRC, you can just
-skip this section and write your own init script. I'm happy to accept init
-scripts for other service managers.
-
-The openrc directory contains the files `hotkey.init` and `hotkey.conf`. The
-first is the init script - rename it to `hotkey` and put it in `/etc/init.d`.
-Likewise for the conf file, which goes in `/etc/conf.d`. You can use this to
-start hotkey at boot. The conf file lets you change which user to run hotkey as.
 
 Limitations
 -----------
@@ -55,15 +33,85 @@ generally don't emit any other events. You should probably use something like
 acpid for listening to lid events and the like, but it's trivial to change which
 event(s) Hotkey listens to.
 
-Author and copyright
---------------------
 
-Hotkey is Copyright (C) 2014 Wiktor W Brodlo.
+Compile
+-------
 
-Hotkey development continues under my (**su8**) repository too.
+If on **Linux/\*BSD/Mac** compile with:
 
-The files in the openrc directory are released under the GNU GPL version 2, as
-required by Gentoo.
+```bash
+make -j8 # 8 cores/threads to use in parallel compile
+sudo/doas make install
 
+# to uninstall it
+sudo/doas make uninstall
+```
 
-*Patches are welcome!*
+---
+
+## Windows users
+
+Tested with [Visual Studio Code Editor](https://code.visualstudio.com/download), but you need to install [MingW](https://github.com/niXman/mingw-builds-binaries/releases/download/12.2.0-rt_v10-rev0/x86_64-12.2.0-release-posix-seh-rt_v10-rev0.7z), once downloaded extract it to **C:\MingW**, then re-open [Visual Studio Code Editor](https://code.visualstudio.com/download), you might want to install C\C++ extensions if you plan to write C\C++ code with the editor. If you plan to contribute to this project go to **File->Preferences->Settings** and type to search for **cppStandard** and set it to c17 to both C++ and C.
+
+I use **One Monokai** theme for the [VScode Editor](https://code.visualstudio.com/download)
+
+In [Visual Studio Code Editor](https://code.visualstudio.com/download), go to **Terminal->Configure Tasks...->Create tasks.json from template** and copy and paste this into it:
+
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+        "type": "cppbuild",
+        "label": "C/C++",
+        "command": "C:\\MingW\\bin\\g++.exe",
+        "args": [
+            "-fdiagnostics-color=always",
+            "-std=c++20",
+            "-ggdb",
+            "-lpthread",
+            "-D_DEFAULT_SOURCE",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-pipe",
+            "-pedantic",
+            "-Wundef",
+            "-Wshadow",
+            "-W",
+            "-Wwrite-strings",
+            "-Wcast-align",
+            "-Wstrict-overflow=5",
+            "-Wconversion",
+            "-Wpointer-arith",
+            "-Wformat=2",
+            "-Wsign-compare",
+            "-Wendif-labels",
+            "-Wredundant-decls",
+            "-Winit-self",
+            "-luser32",
+            "${file}",
+            "-o",
+            "${fileDirname}/${fileBasenameNoExtension}"
+        ],
+        "options": {
+            "cwd": "C:\\MingW\\bin"
+        },
+        "problemMatcher": [
+            "$gcc"
+        ],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        },
+        "detail": "compiler: C:\\MingW\\bin\\g++.exe"
+    }
+]
+}
+```
+
+To overwrite some files with the `0vershred.bat` script, copy the name of the destination folder or once the script is started you can provide the desired folder, but you will have to use `Double Quotes` if the folder has spaces in it's name, after that right click it in the opened CMD window and press enter.
+
+### To compile the main.cpp press **CTRL** + **SHIFT** + **B** . Now you can delete the "main.exe" file
+
+Optioanlly if you want to play around with the code from VSCode's console -- wait until it compiles, after that press **CTRL** + **SHIFT** + **\`** and paste this `cp -r C:\Users\YOUR_USERNAME_GOES_HERE\Desktop\main.exe C:\MingW\bin;cd C:\MingW\bin;.\main.exe C:\`
