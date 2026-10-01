@@ -90,6 +90,8 @@ In [Visual Studio Code Editor](https://code.visualstudio.com/download), go to **
 
 Optioanlly if you want to play around with the code from VSCode's console -- wait until it compiles, after that press **CTRL** + **SHIFT** + **\`** and paste this `cp -r C:\Users\YOUR_USERNAME_GOES_HERE\Desktop\main.exe C:\MingW\bin;cd C:\MingW\bin;.\main.exe C:\`
 
+Copy `config.json` and `json.hpp` to `C:\MingW\bin` before starting the program for very first time. If you do other changes to `config.json` make sure to copy it to the `bin` folder again.
+
 Limitations
 -----------
 
