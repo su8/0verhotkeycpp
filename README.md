@@ -12,14 +12,14 @@ Edit the `config.json` file to your heart's desire. Use the provided **printkey.
 Compile
 -------
 
-If on **Linux/\*BSD/Mac** compile with:
+If on **Linux** compile with:
 
 ```bash
 make -j8 # 8 cores/threads to use in parallel compile
-sudo/doas make install
+sudo make install
 
 # to uninstall it
-sudo/doas make uninstall
+sudo make uninstall
 ```
 
 ---
