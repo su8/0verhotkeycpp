@@ -4,15 +4,6 @@ HOTKEY
 Hotkey is a simple program that listens on an evdev input device and reacts by
 launching a command.
 
-Usage
------
-
-```bash
-while true; do
-  sudo 0verhotkey++
-done
-```
-
 Configuration
 -------------
 
