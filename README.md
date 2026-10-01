@@ -116,8 +116,6 @@ In [Visual Studio Code Editor](https://code.visualstudio.com/download), go to **
 }
 ```
 
-To overwrite some files with the `0vershred.bat` script, copy the name of the destination folder or once the script is started you can provide the desired folder, but you will have to use `Double Quotes` if the folder has spaces in it's name, after that right click it in the opened CMD window and press enter.
-
 ### To compile the main.cpp press **CTRL** + **SHIFT** + **B**
 
 Optioanlly if you want to play around with the code from VSCode's console -- wait until it compiles, after that press **CTRL** + **SHIFT** + **\`** and paste this `cp -r C:\Users\YOUR_USERNAME_GOES_HERE\Desktop\main.exe C:\MingW\bin;cd C:\MingW\bin;.\main.exe C:\`
