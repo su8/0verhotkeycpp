@@ -1,0 +1,18 @@
+{
+  "combos": [
+    {
+      "keys": ["CTRL", "ALT", "K"],
+      "command": "echo CTRL+ALT+K pressed!"
+    },
+    {
+      "keys": ["SPACE"],
+      "command": "echo Spacebar pressed!"
+    }
+  ],
+  "keycodes": {
+    "CTRL": { "linux": 29, "windows": 17 },
+    "ALT": { "linux": 56, "windows": 18 },
+    "SPACE": { "linux": 57, "windows": 32 },
+    "K": { "linux": 37, "windows": 75 }
+  }
+}

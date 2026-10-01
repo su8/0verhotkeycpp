@@ -7,29 +7,7 @@ launching a command.
 Configuration
 -------------
 
-Edit the `main.cpp` file to your heart's desire.
-
-If on Windows edit the following line(s):
-
-https://github.com/su8/0verhotkeycpp/blob/5347d96a4737cdb842e6e5d316b0d9dfa265a8fd/main.cpp#L84
-
-If on Unix edit the following line(s):
-
-https://github.com/su8/0verhotkeycpp/blob/5347d96a4737cdb842e6e5d316b0d9dfa265a8fd/main.cpp#L100
-
-Limitations
------------
-
-Hotkey can only listen on a single device file. If you want to listen on
-multiple device files, just configure and install it multiple times under
-different names. This way, you can have completely different configurations for
-each keyboard you have.
-
-Hotkey will only listen for `EV_KEY` events. This is by design; keyboards
-generally don't emit any other events. You should probably use something like
-acpid for listening to lid events and the like, but it's trivial to change which
-event(s) Hotkey listens to.
-
+Edit the `config.json` file to your heart's desire. Use the provided **printkey.cpp** if on `Windows` to get the numbers behind the desired keys, if on linux see `/usr/include/linux/input-event-codes.h`
 
 Compile
 -------
@@ -46,7 +24,8 @@ sudo/doas make uninstall
 
 ---
 
-## Windows users
+Windows users
+-------------
 
 Tested with [Visual Studio Code Editor](https://code.visualstudio.com/download), but you need to install [MingW](https://github.com/niXman/mingw-builds-binaries/releases/download/12.2.0-rt_v10-rev0/x86_64-12.2.0-release-posix-seh-rt_v10-rev0.7z), once downloaded extract it to **C:\MingW**, then re-open [Visual Studio Code Editor](https://code.visualstudio.com/download), you might want to install C\C++ extensions if you plan to write C\C++ code with the editor. If you plan to contribute to this project go to **File->Preferences->Settings** and type to search for **cppStandard** and set it to c17 to both C++ and C.
 
@@ -111,6 +90,15 @@ In [Visual Studio Code Editor](https://code.visualstudio.com/download), go to **
 
 Optioanlly if you want to play around with the code from VSCode's console -- wait until it compiles, after that press **CTRL** + **SHIFT** + **\`** and paste this `cp -r C:\Users\YOUR_USERNAME_GOES_HERE\Desktop\main.exe C:\MingW\bin;cd C:\MingW\bin;.\main.exe C:\`
 
-If still on Windows:
+Limitations
+-----------
 
-To get what corresponding key number is behind each key stroke, use **printkey.cpp**, again compile it with the above commands.
+Hotkey can only listen on a single device file. If you want to listen on
+multiple device files, just configure and install it multiple times under
+different names. This way, you can have completely different configurations for
+each keyboard you have.
+
+Hotkey will only listen for `EV_KEY` events. This is by design; keyboards
+generally don't emit any other events. You should probably use something like
+acpid for listening to lid events and the like, but it's trivial to change which
+event(s) Hotkey listens to.

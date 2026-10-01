@@ -16,12 +16,14 @@
  * MA 02110-1301, USA.
  */
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <vector>
 #include <thread>
 #include <chrono>
+#include <cstdlib>
 #include <map>
 #include <set>
-#include <cstdlib>
 
 #ifdef _WIN32
   #include <windows.h>
@@ -29,28 +31,24 @@
   #include <algorithm>
   #include <fcntl.h>
   #include <unistd.h>
-  #include <linux/input.h>
+  #include <sstream>
+  #include <algorithm>
   #include <dirent.h>
   #include <cstring>
   #include <sys/ioctl.h>
-#endif
+  #include <linux/input.h>
+#endif /* _WIN32 */
 
-void launchCommandAsync(const std::string &cmd);
+#include "json.hpp"
 
-// Launch a system command asynchronously
-void launchCommandAsync(const std::string &cmd) {
-  std::thread([cmd]() {
-    int ret = std::system(cmd.c_str());
-    if (ret == -1) { std::cerr << "Failed to execute command: " << cmd << "\n"; }
-  }).detach();
-}
+using json = nlohmann::json;
 
-#ifdef _WIN32
-bool isKeyDown(int vkCode);
-bool isKeyDown(int vkCode) {
-  return (GetAsyncKeyState(vkCode) & 0x8000) != 0;
-}
-#else
+struct Combo {
+  std::vector<std::string> keys;
+  std::string command;
+};
+
+#ifdef __linux__
 std::string findKeyboardDevice(void);
 std::string findKeyboardDevice(void) {
   const char *devPath = "/dev/input/";
@@ -68,66 +66,82 @@ std::string findKeyboardDevice(void) {
           std::string devName(name);
           if (devName.find("Keyboard") != std::string::npos || devName.find("keyboard") != std::string::npos) { close(fd); closedir(dir); return fullPath; }
         }
-        close(fd);
+      close(fd);
       }
     }
   }
   closedir(dir);
   return "";
 }
-#endif
+#endif /* __linux__ */
 
 int main(void) {
+  // Load JSON config
+  std::ifstream cfgFile("config.json");
+  if (!cfgFile) { std::cerr << "Could not open config.json\n"; return EXIT_FAILURE; }
+  json cfg;
+  cfgFile >> cfg;
+  std::vector<Combo> combos;
+  for (auto &c : cfg["combos"]) {
+    Combo combo;
+    combo.keys = c["keys"].get<std::vector<std::string>>();
+    combo.command = c["command"].get<std::string>();
+    combos.push_back(combo);
+  }
+  // Load keycodes from JSON
+  std::map<std::string, int> keycodes;
+  for (auto &kv : cfg["keycodes"].items()) {
+    keycodes[kv.key()] =
 #ifdef _WIN32
-  // Map of keys → command
-  std::map<std::set<int>, std::string> hotkeys = {
-    {{VK_CONTROL, VK_SHIFT, 0x58}, "cmd /c echo Ctrl+Shift+X pressed!"}, // control shift x keys
-    {{VK_MENU, 0x41}, "cmd /c echo Alt+A pressed!"} // Alt + A
-  };
+    kv.value()["windows"];
+#else
+    kv.value()["linux"];
+#endif /* _WIN32 */
+  }
 
+#ifdef _WIN32
+  std::cout << "Listening (Windows)...\n";
   while (true) {
-    for (auto &pair : hotkeys) {
-      bool allPressed = true;
-      for (int key : pair.first) { if (!isKeyDown(key)) { allPressed = false; break; } }
-      if (allPressed) { launchCommandAsync(pair.second); std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
+    for (auto &combo : combos) {
+      bool match = true;
+      for (auto &k : combo.keys) {
+        if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; }
+      }
+      if (match) {
+        std::system(combo.command.c_str());
+        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
+      }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
-
 #else
-    // See /usr/include/linux/input-event-codes.h
-  std::map<std::set<int>, std::string> hotkeys = {
-    {{KEY_LEFTCTRL, KEY_LEFTSHIFT, KEY_X}, "echo Ctrl+Shift+X pressed!"},
-    {{KEY_LEFTALT, KEY_A}, "echo Alt+A pressed!"}
-  };
-
+  // See /usr/include/linux/input-event-codes.h
   std::string device = findKeyboardDevice();
   if (device.empty()) { std::cerr << "No keyboard device found. Try running as root.\n"; return EXIT_FAILURE; }
-
   std::cout << "Using device: " << device << "\n";
   int fd = open(device.c_str(), O_RDONLY | O_NONBLOCK);
   if (fd < 0) { perror("open"); return EXIT_FAILURE; }
-
-  std::set<int> pressedKeys;
+  std::map<int,bool> keyState;
   struct input_event ev;
+  std::cout << "Listening for (Linux /dev/input)...\n";
   while (true) {
     ssize_t n = read(fd, &ev, sizeof(ev));
-    if (n == (ssize_t)sizeof(ev)) {
+    if (n != sizeof(ev)) continue;
       if (ev.type == EV_KEY) {
-        if (ev.value == 1) { // key down
-          pressedKeys.insert(ev.code);
-        } else if (ev.value == 0) { // key up
-          pressedKeys.erase(ev.code);
-        }
-        // Check hotkeys
-        for (auto &pair : hotkeys) {
-          if (std::includes(pressedKeys.begin(), pressedKeys.end(), pair.first.begin(), pair.first.end())) { launchCommandAsync(pair.second); std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
+        keyState[ev.code] = (ev.value != 0);
+        for (auto &combo : combos) {
+          bool match = true;
+          for (auto &k : combo.keys) {
+            if (!keyState[keycodes[k]]) { match = false; break; }
+          }
+          if (match) {
+            std::system(combo.command.c_str());
+            std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
+          }
         }
       }
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  }
   close(fd);
-#endif
+#endif /* _WIN32 */
   return EXIT_SUCCESS;
 }
