@@ -131,9 +131,7 @@ int main(void) {
         keyState[ev.code] = (ev.value != 0);
         for (auto &combo : combos) {
           bool match = true;
-          for (auto &k : combo.keys) {
-            if (!keyState[keycodes[k]]) { match = false; break; }
-          }
+          for (auto &k : combo.keys) { if (!keyState[keycodes[k]]) { match = false; break; } }
           if (match) {
             std::system(combo.command.c_str());
             std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
