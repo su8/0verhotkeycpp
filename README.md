@@ -113,4 +113,4 @@ Optioanlly if you want to play around with the code from VSCode's console -- wai
 
 If still on Windows:
 
-To get what corresponding key number is behind each key stroke, use **printkey.c**, again compile it with the above commands.
+To get what corresponding key number is behind each key stroke, use **printkey.cpp**, again compile it with the above commands.
