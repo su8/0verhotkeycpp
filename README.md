@@ -7,7 +7,7 @@ launching a command.
 Configuration
 -------------
 
-Edit the `config.json` file to your heart's desire. Use the provided **printkey.cpp** if on `Windows` to get the numbers behind the desired keys, if on linux see `/usr/include/linux/input-event-codes.h`
+Edit the `config.json` file to your heart's desire. Use the provided **printkey.cpp** if on `Windows` to get the numbers behind the desired keys, if on linux see `/usr/include/linux/input-event-codes.h` , optionally you can install `evtest` and `sudo evtest` and press the desired keyboard key(s).
 
 Compile
 -------
