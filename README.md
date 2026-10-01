@@ -16,9 +16,15 @@ done
 Configuration
 -------------
 
-Edit the `hotkey.c` file to your heart's desire. It contains a few examples and
-an explanation of what the options mean. The configuration gets compiled into
-the binary, which keeps the code simple and makes startup quick and secure.
+Edit the `main.cpp` file to your heart's desire.
+
+If on Windows edit the following line(s):
+
+https://github.com/su8/0verhotkeycpp/blob/5347d96a4737cdb842e6e5d316b0d9dfa265a8fd/main.cpp#L84
+
+If on Unix edit the following line(s):
+
+https://github.com/su8/0verhotkeycpp/blob/5347d96a4737cdb842e6e5d316b0d9dfa265a8fd/main.cpp#L100
 
 Limitations
 -----------
