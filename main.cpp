@@ -104,9 +104,7 @@ int main(void) {
   while (true) {
     for (auto &combo : combos) {
       bool match = true;
-      for (auto &k : combo.keys) {
-        if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; }
-      }
+      for (auto &k : combo.keys) { if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; } }
       if (match) {
         std::system(combo.command.c_str());
         std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
