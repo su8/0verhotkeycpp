@@ -16,15 +16,9 @@ done
 Configuration
 -------------
 
-Edit the `main.cpp` file to your heart's desire.
-
-If on Windows edit the following line(s):
-
-https://github.com/su8/0verhotkeycpp/blob/5347d96a4737cdb842e6e5d316b0d9dfa265a8fd/main.cpp#L84
-
-If on Unix edit the following line(s):
-
-https://github.com/su8/0verhotkeycpp/blob/5347d96a4737cdb842e6e5d316b0d9dfa265a8fd/main.cpp#L100
+Edit the `hotkey.c` file to your heart's desire. It contains a few examples and
+an explanation of what the options mean. The configuration gets compiled into
+the binary, which keeps the code simple and makes startup quick and secure.
 
 Limitations
 -----------
@@ -118,6 +112,6 @@ In [Visual Studio Code Editor](https://code.visualstudio.com/download), go to **
 
 To overwrite some files with the `0vershred.bat` script, copy the name of the destination folder or once the script is started you can provide the desired folder, but you will have to use `Double Quotes` if the folder has spaces in it's name, after that right click it in the opened CMD window and press enter.
 
-### To compile the main.cpp press **CTRL** + **SHIFT** + **B** . Now you can delete the "main.exe" file
+### To compile the main.cpp press **CTRL** + **SHIFT** + **B**
 
 Optioanlly if you want to play around with the code from VSCode's console -- wait until it compiles, after that press **CTRL** + **SHIFT** + **\`** and paste this `cp -r C:\Users\YOUR_USERNAME_GOES_HERE\Desktop\main.exe C:\MingW\bin;cd C:\MingW\bin;.\main.exe C:\`
