@@ -110,3 +110,7 @@ In [Visual Studio Code Editor](https://code.visualstudio.com/download), go to **
 ### To compile the main.cpp press **CTRL** + **SHIFT** + **B**
 
 Optioanlly if you want to play around with the code from VSCode's console -- wait until it compiles, after that press **CTRL** + **SHIFT** + **\`** and paste this `cp -r C:\Users\YOUR_USERNAME_GOES_HERE\Desktop\main.exe C:\MingW\bin;cd C:\MingW\bin;.\main.exe C:\`
+
+If still on Windows:
+
+To get what corresponding key number is behind each key stroke, use **printkey.c**, again compile it with the above commands.
