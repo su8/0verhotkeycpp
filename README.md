@@ -7,7 +7,7 @@ launching a command.
 Configuration
 -------------
 
-Edit the `config.json` file to your heart's desire. Use the provided **printkey.cpp** if on `Windows` to get the numbers behind the desired keys, if on linux see `/usr/include/linux/input-event-codes.h` , optionally you can install `evtest` and `sudo evtest` and press the desired keyboard key(s).
+Edit the `.0verhotkeycpp_config.json` file to your heart's desire. Use the provided **printkey.cpp** if on `Windows` to get the numbers behind the desired keys, if on linux see `/usr/include/linux/input-event-codes.h` , optionally you can install `evtest` and press the desired keyboard key(s).
 
 Compile
 -------
@@ -90,7 +90,7 @@ In [Visual Studio Code Editor](https://code.visualstudio.com/download), go to **
 
 Optioanlly if you want to play around with the code from VSCode's console -- wait until it compiles, after that press **CTRL** + **SHIFT** + **\`** and paste this `cp -r C:\Users\YOUR_USERNAME_GOES_HERE\Desktop\main.exe C:\MingW\bin;cd C:\MingW\bin;.\main.exe C:\`
 
-Copy `config.json` and `json.hpp` to `C:\MingW\bin` before starting the program for very first time. If you do other changes to `config.json` make sure to copy it to the `bin` folder again.
+Copy `.0verhotkeycpp_config.json` to `C:\MingW\bin` before starting the program for very first time. If you do other changes to `.0verhotkeycpp_config.json` make sure to copy it to the `MingW\bin` folder again, or just edit the **MingW** config one.
 
 Limitations
 -----------

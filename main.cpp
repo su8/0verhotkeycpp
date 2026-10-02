@@ -29,6 +29,7 @@
 
 #ifdef _WIN32
   #include <windows.h>
+std::string configHome = "C:\\MingW\\bin\\.0verhotkeycpp_config.json";
 #else
   #include <algorithm>
   #include <fcntl.h>
@@ -39,6 +40,7 @@
   #include <sys/ioctl.h>
   #include <linux/input.h>
 static std::string findKeyboardDevice(void);
+std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("HOME")) + std::string("/") : std::string("./")) + ".0verhotkeycpp_config.json");
 #endif /* _WIN32 */
 
 #include "json.hpp"
@@ -105,8 +107,8 @@ int main(void) {
 }
 
 static void loadConfig(void) {
-  std::ifstream cfgFile("config.json");
-  if (!cfgFile) { std::cerr << "Could not open config.json\n"; exit(EXIT_FAILURE); }
+  std::ifstream cfgFile(configHome);
+  if (!cfgFile) { std::cerr << "Could not open " << configHome << "\n"; exit(EXIT_FAILURE); }
   json cfg;
   cfgFile >> cfg;
   for (auto &c : cfg["combos"]) {
@@ -126,8 +128,8 @@ static void loadConfig(void) {
 }
 
 static void checkIfConfigHasToBeReloaded(void) {
-  static auto oldTime = fs::last_write_time("config.json");
-  auto newTime = fs::last_write_time("config.json");
+  static auto oldTime = fs::last_write_time(configHome);
+  auto newTime = fs::last_write_time(configHome);
   if (newTime != oldTime) {
     combos.clear();
     keycodes.clear();
