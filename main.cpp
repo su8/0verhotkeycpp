@@ -68,10 +68,7 @@ int main(void) {
     for (auto &combo : combos) {
       bool match = true;
       for (auto &k : combo.keys) { if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; } }
-      if (match) {
-        launchCommand(combo.command.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
-      }
+      if (match) { launchCommand(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
@@ -93,10 +90,7 @@ int main(void) {
       for (auto &combo : combos) {
         bool match = true;
         for (auto &k : combo.keys) { if (!keyState[keycodes[k]]) { match = false; break; } }
-        if (match) {
-          launchCommand(combo.command.c_str());
-          std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
-        }
+        if (match) { launchCommand(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
       }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
