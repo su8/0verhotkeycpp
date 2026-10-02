@@ -1,4 +1,4 @@
-HOTKEY
+0verhotkeycpp  [![C/C++ CI](https://github.com/su8/0verhotkeycpp/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/su8/0verhotkeycpp/actions/workflows/c-cpp.yml)
 ======
 
 Hotkey is a simple program that listens on an evdev input device and reacts by
