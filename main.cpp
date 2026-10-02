@@ -29,7 +29,7 @@
 
 #ifdef _WIN32
   #include <windows.h>
-std::string configHome = "C:\\MingW\\bin\\.0verhotkeycpp_config.json";
+static std::string configHome = "C:\\MingW\\bin\\.0verhotkeycpp_config.json";
 #else
   #include <algorithm>
   #include <fcntl.h>
@@ -39,15 +39,15 @@ std::string configHome = "C:\\MingW\\bin\\.0verhotkeycpp_config.json";
   #include <cstring>
   #include <sys/ioctl.h>
   #include <linux/input.h>
-static std::string findKeyboardDevice(void);
-std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("HOME")) + std::string("/") : std::string("./")) + ".0verhotkeycpp_config.json";
+static inline std::string findKeyboardDevice(void);
+static std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("HOME")) + std::string("/") : std::string("./")) + ".0verhotkeycpp_config.json";
 #endif /* _WIN32 */
 
 #include "json.hpp"
 
-static void loadConfig(void);
-static void checkIfConfigHasToBeReloaded(void);
-static void launchCommand(const std::string &cmd);
+static inline void loadConfig(void);
+static inline void checkIfConfigHasToBeReloaded(void);
+static inline void launchCommand(const std::string &cmd);
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
@@ -55,9 +55,9 @@ struct Combo {
   std::vector<std::string> keys;
   std::string command;
 };
-std::vector<Combo> combos;
-std::map<std::string, int> keycodes;
-std::mutex cmdMutex;
+static std::vector<Combo> combos;
+static std::map<std::string, int> keycodes;
+static std::mutex cmdMutex;
 
 int main(void) {
   loadConfig();
@@ -106,7 +106,7 @@ int main(void) {
   return EXIT_SUCCESS;
 }
 
-static void loadConfig(void) {
+static inline void loadConfig(void) {
   std::ifstream cfgFile(configHome);
   if (!cfgFile) { std::cerr << "Could not open " << configHome << "\n"; exit(EXIT_FAILURE); }
   json cfg;
@@ -127,7 +127,7 @@ static void loadConfig(void) {
   }
 }
 
-static void checkIfConfigHasToBeReloaded(void) {
+static inline void checkIfConfigHasToBeReloaded(void) {
   static auto oldTime = fs::last_write_time(configHome);
   auto newTime = fs::last_write_time(configHome);
   if (newTime != oldTime) {
@@ -138,14 +138,14 @@ static void checkIfConfigHasToBeReloaded(void) {
   }
 }
 
-static void launchCommand(const std::string &cmd) {
+static inline void launchCommand(const std::string &cmd) {
   std::lock_guard<std::mutex> lock(cmdMutex);
   int ret = std::system(cmd.c_str());
   if (ret == -1) { std::cerr << "Failed to execute command: " << cmd << "\n"; }
 }
 
 #ifdef __linux__
-static std::string findKeyboardDevice(void) {
+static inline std::string findKeyboardDevice(void) {
   const char *devPath = "/dev/input/";
   DIR *dir = opendir(devPath);
   if (!dir) return "";
