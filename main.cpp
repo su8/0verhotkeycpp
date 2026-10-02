@@ -98,19 +98,19 @@ int main(void) {
   std::cout << "Listening for (Linux /dev/input)...\n";
   while (true) {
     ssize_t n = read(fd, &ev, sizeof(ev));
-    if (n != sizeof(ev)) continue;
-      if (ev.type == EV_KEY) {
-        keyState[ev.code] = (ev.value != 0);
-        for (auto &combo : combos) {
-          bool match = true;
-          for (auto &k : combo.keys) { if (!keyState[keycodes[k]]) { match = false; break; } }
-          if (match) {
-            launchCommand(combo.command.c_str());
-            std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
-          }
+    if (n != sizeof(ev)) { continue; }
+    if (ev.type == EV_KEY) {
+      keyState[ev.code] = (ev.value != 0);
+      for (auto &combo : combos) {
+        bool match = true;
+        for (auto &k : combo.keys) { if (!keyState[keycodes[k]]) { match = false; break; } }
+        if (match) {
+          launchCommand(combo.command.c_str());
+          std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
         }
       }
     }
+  }
   close(fd);
 #endif /* _WIN32 */
   return EXIT_SUCCESS;
