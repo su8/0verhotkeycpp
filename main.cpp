@@ -33,7 +33,6 @@
   #include <fcntl.h>
   #include <unistd.h>
   #include <sstream>
-  #include <algorithm>
   #include <dirent.h>
   #include <cstring>
   #include <sys/ioctl.h>
