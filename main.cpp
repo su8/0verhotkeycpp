@@ -25,6 +25,7 @@
 #include <map>
 #include <set>
 #include <mutex>
+#include <filesystem>
 
 #ifdef _WIN32
   #include <windows.h>
@@ -47,6 +48,7 @@ static void checkIfConfigHasToBeReloaded(void);
 static void launchCommand(const std::string &cmd);
 
 using json = nlohmann::json;
+namespace fs = std::filesystem;
 struct Combo {
   std::vector<std::string> keys;
   std::string command;
@@ -54,7 +56,6 @@ struct Combo {
 std::vector<Combo> combos;
 std::map<std::string, int> keycodes;
 std::mutex cmdMutex;
-int reloadIntervalMs = 5000;
 
 int main(void) {
   loadConfig();
@@ -108,7 +109,6 @@ static void loadConfig(void) {
   if (!cfgFile) { std::cerr << "Could not open config.json\n"; exit(EXIT_FAILURE); }
   json cfg;
   cfgFile >> cfg;
-  reloadIntervalMs = cfg.value("reload_interval_ms", 5000);
   for (auto &c : cfg["combos"]) {
     Combo combo;
     combo.keys = c["keys"].get<std::vector<std::string>>();
@@ -126,13 +126,13 @@ static void loadConfig(void) {
 }
 
 static void checkIfConfigHasToBeReloaded(void) {
-  static auto lastMod = std::chrono::steady_clock::now();
-  auto modTime = std::chrono::steady_clock::now();
-  if (std::chrono::duration_cast<std::chrono::milliseconds>(modTime - lastMod).count() >= reloadIntervalMs) {
+  static auto oldTime = fs::last_write_time("config.json");
+  auto newTime = fs::last_write_time("config.json");
+  if (newTime != oldTime) {
     combos.clear();
     keycodes.clear();
     loadConfig();
-    lastMod = modTime;
+    oldTime = newTime;
   }
 }
 

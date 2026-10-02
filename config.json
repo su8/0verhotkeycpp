@@ -1,5 +1,4 @@
 {
-  "reload_interval_ms": 5000,
   "combos": [
     {
       "keys": ["CTRL", "ALT", "K"],
