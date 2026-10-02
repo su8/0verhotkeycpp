@@ -118,11 +118,9 @@ int main(void) {
 }
 
 static void launchCommand(const std::string &cmd) {
-    std::lock_guard<std::mutex> lock(cmdMutex);
-    int ret = std::system(cmd.c_str());
-    if (ret == -1) {
-        std::cerr << "Failed to execute command: " << cmd << "\n";
-    }
+  std::lock_guard<std::mutex> lock(cmdMutex);
+  int ret = std::system(cmd.c_str());
+  if (ret == -1) { std::cerr << "Failed to execute command: " << cmd << "\n"; }
 }
 
 #ifdef __linux__
