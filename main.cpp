@@ -25,9 +25,11 @@
 #include <map>
 #include <set>
 #include <mutex>
+#include <sys/stat.h>
 
 #ifdef _WIN32
   #include <windows.h>
+#define stat _stat
 #else
   #include <algorithm>
   #include <fcntl.h>
@@ -37,45 +39,31 @@
   #include <cstring>
   #include <sys/ioctl.h>
   #include <linux/input.h>
-
 static std::string findKeyboardDevice(void);
 #endif /* _WIN32 */
 
 #include "json.hpp"
 
+static void loadConfig(void);
+static void checkIfConfigHasToBeReloaded(void);
 static void launchCommand(const std::string &cmd);
-std::mutex cmdMutex;
+static std::time_t getFileModTime(void);
+
 using json = nlohmann::json;
 struct Combo {
   std::vector<std::string> keys;
   std::string command;
 };
+std::vector<Combo> combos;
+std::map<std::string, int> keycodes;
+std::mutex cmdMutex;
 
 int main(void) {
-  std::ifstream cfgFile("config.json");
-  if (!cfgFile) { std::cerr << "Could not open config.json\n"; return EXIT_FAILURE; }
-  json cfg;
-  cfgFile >> cfg;
-  std::vector<Combo> combos;
-  for (auto &c : cfg["combos"]) {
-    Combo combo;
-    combo.keys = c["keys"].get<std::vector<std::string>>();
-    combo.command = c["command"].get<std::string>();
-    combos.push_back(combo);
-  }
-  std::map<std::string, int> keycodes;
-  for (auto &kv : cfg["keycodes"].items()) {
-    keycodes[kv.key()] =
-#ifdef _WIN32
-    kv.value()["windows"];
-#else
-    kv.value()["linux"];
-#endif /* _WIN32 */
-  }
-
+  loadConfig();
 #ifdef _WIN32
   std::cout << "Listening (Windows)...\n";
   while (true) {
+    checkIfConfigHasToBeReloaded();
     for (auto &combo : combos) {
       bool match = true;
       for (auto &k : combo.keys) { if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; } }
@@ -87,7 +75,6 @@ int main(void) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 #else
-  // See /usr/include/linux/input-event-codes.h
   std::string device = findKeyboardDevice();
   if (device.empty()) { std::cerr << "No keyboard device found. Try running as root.\n"; return EXIT_FAILURE; }
   std::cout << "Using device: " << device << "\n";
@@ -97,6 +84,7 @@ int main(void) {
   struct input_event ev;
   std::cout << "Listening for (Linux /dev/input)...\n";
   while (true) {
+    checkIfConfigHasToBeReloaded();
     ssize_t n = read(fd, &ev, sizeof(ev));
     if (n != sizeof(ev)) { continue; }
     if (ev.type == EV_KEY) {
@@ -110,10 +98,50 @@ int main(void) {
         }
       }
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
   close(fd);
 #endif /* _WIN32 */
   return EXIT_SUCCESS;
+}
+
+static void loadConfig(void) {
+  std::ifstream cfgFile("config.json");
+  if (!cfgFile) { std::cerr << "Could not open config.json\n"; exit(EXIT_FAILURE); }
+  json cfg;
+  cfgFile >> cfg;
+  for (auto &c : cfg["combos"]) {
+    Combo combo;
+    combo.keys = c["keys"].get<std::vector<std::string>>();
+    combo.command = c["command"].get<std::string>();
+    combos.push_back(combo);
+  }
+  for (auto &kv : cfg["keycodes"].items()) {
+    keycodes[kv.key()] =
+#ifdef _WIN32
+    kv.value()["windows"];
+#else
+    kv.value()["linux"];
+#endif /* _WIN32 */
+  }
+}
+
+static std::time_t getFileModTime(void) {
+  struct stat st;
+  if (stat("config.json", &st) == 0) { return st.st_mtime; }
+  return 0;
+}
+
+static void checkIfConfigHasToBeReloaded(void) {
+  static std::time_t lastMod = getFileModTime();
+  std::time_t modTime = getFileModTime();
+  if (modTime != lastMod) {
+    std::cout << "Reloading config...\n";
+    combos.clear();
+    keycodes.clear();
+    loadConfig();
+    lastMod = modTime;
+  }
 }
 
 static void launchCommand(const std::string &cmd) {
