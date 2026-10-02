@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <map>
 #include <set>
+#include <mutex>
 
 #ifdef _WIN32
   #include <windows.h>
@@ -37,46 +38,21 @@
   #include <cstring>
   #include <sys/ioctl.h>
   #include <linux/input.h>
+
+static std::string findKeyboardDevice(void);
 #endif /* _WIN32 */
 
 #include "json.hpp"
 
+static void launchCommand(const std::string &cmd);
+std::mutex cmdMutex;
 using json = nlohmann::json;
-
 struct Combo {
   std::vector<std::string> keys;
   std::string command;
 };
 
-#ifdef __linux__
-std::string findKeyboardDevice(void);
-std::string findKeyboardDevice(void) {
-  const char *devPath = "/dev/input/";
-  DIR *dir = opendir(devPath);
-  if (!dir) return "";
-
-  struct dirent *entry;
-  char name[256];
-  while ((entry = readdir(dir)) != nullptr) {
-    if (strncmp(entry->d_name, "event", 5) == 0) {
-      std::string fullPath = std::string(devPath) + entry->d_name;
-      int fd = open(fullPath.c_str(), O_RDONLY);
-      if (fd >= 0) {
-        if (ioctl(fd, EVIOCGNAME(sizeof(name)), name) >= 0) {
-          std::string devName(name);
-          if (devName.find("Keyboard") != std::string::npos || devName.find("keyboard") != std::string::npos) { close(fd); closedir(dir); return fullPath; }
-        }
-      close(fd);
-      }
-    }
-  }
-  closedir(dir);
-  return "";
-}
-#endif /* __linux__ */
-
 int main(void) {
-  // Load JSON config
   std::ifstream cfgFile("config.json");
   if (!cfgFile) { std::cerr << "Could not open config.json\n"; return EXIT_FAILURE; }
   json cfg;
@@ -88,7 +64,6 @@ int main(void) {
     combo.command = c["command"].get<std::string>();
     combos.push_back(combo);
   }
-  // Load keycodes from JSON
   std::map<std::string, int> keycodes;
   for (auto &kv : cfg["keycodes"].items()) {
     keycodes[kv.key()] =
@@ -106,7 +81,7 @@ int main(void) {
       bool match = true;
       for (auto &k : combo.keys) { if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; } }
       if (match) {
-        std::system(combo.command.c_str());
+        launchCommand(combo.command.c_str());
         std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
       }
     }
@@ -131,7 +106,7 @@ int main(void) {
           bool match = true;
           for (auto &k : combo.keys) { if (!keyState[keycodes[k]]) { match = false; break; } }
           if (match) {
-            std::system(combo.command.c_str());
+            launchCommand(combo.command.c_str());
             std::this_thread::sleep_for(std::chrono::milliseconds(500)); // debounce
           }
         }
@@ -141,3 +116,37 @@ int main(void) {
 #endif /* _WIN32 */
   return EXIT_SUCCESS;
 }
+
+static void launchCommand(const std::string &cmd) {
+    std::lock_guard<std::mutex> lock(cmdMutex);
+    int ret = std::system(cmd.c_str());
+    if (ret == -1) {
+        std::cerr << "Failed to execute command: " << cmd << "\n";
+    }
+}
+
+#ifdef __linux__
+static std::string findKeyboardDevice(void) {
+  const char *devPath = "/dev/input/";
+  DIR *dir = opendir(devPath);
+  if (!dir) return "";
+
+  struct dirent *entry;
+  char name[256];
+  while ((entry = readdir(dir)) != nullptr) {
+    if (strncmp(entry->d_name, "event", 5) == 0) {
+      std::string fullPath = std::string(devPath) + entry->d_name;
+      int fd = open(fullPath.c_str(), O_RDONLY);
+      if (fd >= 0) {
+        if (ioctl(fd, EVIOCGNAME(sizeof(name)), name) >= 0) {
+          std::string devName(name);
+          if (devName.find("Keyboard") != std::string::npos || devName.find("keyboard") != std::string::npos) { close(fd); closedir(dir); return fullPath; }
+        }
+      close(fd);
+      }
+    }
+  }
+  closedir(dir);
+  return "";
+}
+#endif /* __linux__ */
