@@ -40,7 +40,7 @@ std::string configHome = "C:\\MingW\\bin\\.0verhotkeycpp_config.json";
   #include <sys/ioctl.h>
   #include <linux/input.h>
 static std::string findKeyboardDevice(void);
-std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("HOME")) + std::string("/") : std::string("./")) + ".0verhotkeycpp_config.json");
+std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("HOME")) + std::string("/") : std::string("./")) + ".0verhotkeycpp_config.json";
 #endif /* _WIN32 */
 
 #include "json.hpp"
