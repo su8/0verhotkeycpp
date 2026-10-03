@@ -106,7 +106,7 @@ int main(void) {
   return EXIT_SUCCESS;
 }
 
-void signalHandler(int signum) {
+static void signalHandler(int signum) {
   if (signum == SIGINT) { for (auto &t : runningThreads) { pthread_cancel(t.native_handle()); t.detach(); } stopFlag.store(true); }
 }
 
