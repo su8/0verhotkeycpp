@@ -26,6 +26,7 @@
 #include <set>
 #include <mutex>
 #include <filesystem>
+#include <csignal>
 
 #ifdef _WIN32
   #include <windows.h>
@@ -48,6 +49,7 @@ static std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("
 static inline void loadConfig(void);
 static inline void checkIfConfigHasToBeReloaded(void);
 static inline void launchCommandThread(const std::string &cmd);
+static void signalHandler(int signum);
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
@@ -59,12 +61,14 @@ static std::vector<Combo> combos;
 static std::map<std::string, int> keycodes;
 static std::mutex cmdMutex;
 static std::vector<std::thread> runningThreads;
+static std::atomic<bool> stopFlag(false);
 
 int main(void) {
+  std::signal(SIGINT, signalHandler);
   loadConfig();
 #ifdef _WIN32
   std::cout << "Listening (Windows)...\n";
-  while (true) {
+  while (!stopFlag.load()) {
     checkIfConfigHasToBeReloaded();
     for (auto &combo : combos) {
       bool match = true;
@@ -82,7 +86,7 @@ int main(void) {
   std::map<int,bool> keyState;
   struct input_event ev;
   std::cout << "Listening for (Linux /dev/input)...\n";
-  while (true) {
+  while (!stopFlag.load()) {
     checkIfConfigHasToBeReloaded();
     ssize_t n = read(fd, &ev, sizeof(ev));
     if (n != sizeof(ev)) { continue; }
@@ -99,6 +103,10 @@ int main(void) {
   close(fd);
 #endif /* _WIN32 */
   return EXIT_SUCCESS;
+}
+
+void signalHandler(int signum) {
+  if (signum == SIGINT) { for (auto &t : runningThreads) { if (t.joinable()) { t.join(); }} stopFlag.store(true); }
 }
 
 static inline void loadConfig(void) {
