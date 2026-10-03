@@ -176,8 +176,8 @@ static inline std::string findKeyboardDevice(void) {
   DIR* dir2 = opendir(path);
   if (!dir2) return "";
   while ((entry = readdir(dir2)) != nullptr) {
-    std::string name(entry->d_name);
-    if (name.find("kbd") != std::string::npos) { closedir(dir2); return std::string(path) + name; }
+    std::string name2(entry->d_name);
+    if (name2.find("kbd") != std::string::npos) { closedir(dir2); return std::string(path) + name2; }
   }
   closedir(dir2);
   return "";
