@@ -47,7 +47,7 @@ static std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("
 
 static inline void loadConfig(void);
 static inline void checkIfConfigHasToBeReloaded(void);
-static inline void launchCommand(const std::string &cmd);
+static inline void launchCommandThread(const std::string &cmd);
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
@@ -58,6 +58,7 @@ struct Combo {
 static std::vector<Combo> combos;
 static std::map<std::string, int> keycodes;
 static std::mutex cmdMutex;
+static std::vector<std::thread> runningThreads;
 
 int main(void) {
   loadConfig();
@@ -68,7 +69,7 @@ int main(void) {
     for (auto &combo : combos) {
       bool match = true;
       for (auto &k : combo.keys) { if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; } }
-      if (match) { launchCommand(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
+      if (match) { launchCommandThread(combo.command.c_str()); for (auto &t : runningThreads) { if (t.joinable()) { t.join(); }} std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
@@ -90,7 +91,7 @@ int main(void) {
       for (auto &combo : combos) {
         bool match = true;
         for (auto &k : combo.keys) { if (!keyState[keycodes[k]]) { match = false; break; } }
-        if (match) { launchCommand(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
+        if (match) { launchCommandThread(combo.command.c_str()); for (auto &t : runningThreads) { if (t.joinable()) { t.join(); }} std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
       }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -132,10 +133,12 @@ static inline void checkIfConfigHasToBeReloaded(void) {
   }
 }
 
-static inline void launchCommand(const std::string &cmd) {
+static inline void launchCommandThread(const std::string &cmd) {
   std::lock_guard<std::mutex> lock(cmdMutex);
-  int ret = std::system(cmd.c_str());
-  if (ret == -1) { std::cerr << "Failed to execute command: " << cmd << "\n"; }
+  runningThreads.emplace_back([cmd]() {
+    int ret = std::system(cmd.c_str());
+    if (ret == -1) { std::cerr << "Failed to execute command: " << cmd << "\n"; }
+  });
 }
 
 #ifdef __linux__
@@ -159,6 +162,15 @@ static inline std::string findKeyboardDevice(void) {
     }
   }
   closedir(dir);
+
+  const char *path = "/dev/input/by-id/";
+  DIR* dir2 = opendir(path);
+  if (!dir2) return "";
+  while ((entry = readdir(dir2)) != nullptr) {
+    std::string name(entry->d_name);
+    if (name.find("kbd") != std::string::npos) { closedir(dir2); return std::string(path) + name; }
+  }
+  closedir(dir2);
   return "";
 }
 #endif /* __linux__ */
