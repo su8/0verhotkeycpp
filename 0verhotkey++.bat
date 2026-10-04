@@ -1,10 +1,10 @@
 :TOP
 @CLS
 @ECHO OFF
-TITLE kurger_cli
+TITLE 0verhotkey++
 :BEGIN
 if not exist C:\MingW\bin\0verhotkey++.exe (
-  COPY kurger_cli.exe C:\MingW\bin\0verhotkey++.exe
+  COPY 0verhotkey++.exe C:\MingW\bin\0verhotkey++.exe
 )
 CLS
 :loop
