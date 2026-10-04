@@ -61,7 +61,7 @@ struct Combo {
 static std::vector<Combo> combos;
 static std::map<std::string, int> keycodes;
 static std::mutex cmdMutex;
-static std::vector<std::thread> runningThreads;
+static std::vector<std::jthread> runningThreads;
 static std::atomic<bool> stopFlag(false);
 
 int main(void) {
@@ -103,12 +103,11 @@ int main(void) {
   }
   close(fd);
 #endif /* _WIN32 */
-  //for (auto &t : runningThreads) { if (t.joinable()) { t.join(); }}
   return EXIT_SUCCESS;
 }
 
 static void signalHandler(int signum) {
-  if (signum == SIGINT) { for (auto &t : runningThreads) { pthread_cancel(t.native_handle()); t.detach(); } stopFlag.store(true); }
+  if (signum == SIGINT) { stopFlag.store(true); }
 }
 
 static inline void loadConfig(void) {
