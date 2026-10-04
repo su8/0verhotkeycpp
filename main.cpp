@@ -27,6 +27,7 @@
 #include <mutex>
 #include <filesystem>
 #include <csignal>
+#include <atomic>
 
 #ifdef _WIN32
   #include <windows.h>
@@ -106,7 +107,7 @@ int main(void) {
   return EXIT_SUCCESS;
 }
 
-void signalHandler(int signum) {
+static void signalHandler(int signum) {
   if (signum == SIGINT) { for (auto &t : runningThreads) { pthread_cancel(t.native_handle()); t.detach(); } stopFlag.store(true); }
 }
 
@@ -173,7 +174,7 @@ static inline std::string findKeyboardDevice(void) {
   closedir(dir);
 
   const char *path = "/dev/input/by-id/";
-  DIR* dir2 = opendir(path);
+  DIR *dir2 = opendir(path);
   if (!dir2) return "";
   while ((entry = readdir(dir2)) != nullptr) {
     std::string name2(entry->d_name);
