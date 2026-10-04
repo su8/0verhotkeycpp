@@ -67,6 +67,7 @@ static std::atomic<bool> stopFlag(false);
 int main(void) {
   std::signal(SIGINT, signalHandler);
   loadConfig();
+  uintmax_t x = 0U;
 #ifdef _WIN32
   std::cout << "Listening (Windows)...\n";
   while (!stopFlag.load()) {
@@ -74,7 +75,7 @@ int main(void) {
     for (auto &combo : combos) {
       bool match = true;
       for (auto &k : combo.keys) { if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; } }
-      if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
+      if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
@@ -96,7 +97,7 @@ int main(void) {
       for (auto &combo : combos) {
         bool match = true;
         for (auto &k : combo.keys) { if (!keyState[keycodes[k]]) { match = false; break; } }
-        if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); }
+        if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
       }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -107,7 +108,7 @@ int main(void) {
 }
 
 static void signalHandler(int signum) {
-  if (signum == SIGINT) { for (auto &t : runningThreads) { pthread_cancel(t.native_handle()); t.detach(); } stopFlag.store(true); }
+  if (signum == SIGINT) { stopFlag.store(true); }
 }
 
 static inline void loadConfig(void) {
