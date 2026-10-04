@@ -92,6 +92,8 @@ Optioanlly if you want to play around with the code from VSCode's console -- wai
 
 Copy `.0verhotkeycpp_config.json` to `C:\MingW\bin` before starting the program for very first time. If you do other changes to `.0verhotkeycpp_config.json` make sure to copy it to the `MingW\bin` folder again, or just edit the **MingW** config one.
 
+There is a **.bat** script that you can use to launch the program, instead doing it manually or from the VSCode editor.
+
 Limitations
 -----------
 
