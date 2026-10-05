@@ -1,4 +1,7 @@
 {
+  "sleep": {
+    "debounceMs": 500
+  },
   "combos": [
     {
       "keys": ["CTRL", "ALT", "K"],
@@ -6,7 +9,11 @@
     },
     {
       "keys": ["SPACE"],
-      "command": "echo Spacebar pressed!"
+      "command": "notepad"
+    },
+    {
+      "keys": ["CTRL", "K"],
+      "command": "explorer"
     }
   ],
   "keycodes": {
