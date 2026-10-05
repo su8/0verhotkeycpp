@@ -55,6 +55,7 @@ static void signalHandler(int signum);
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 struct Combo {
+  int debounce;
   std::vector<std::string> keys;
   std::string command;
 };
@@ -63,6 +64,7 @@ static std::map<std::string, int> keycodes;
 static std::mutex cmdMutex;
 static std::vector<std::thread> runningThreads;
 static std::atomic<bool> stopFlag(false);
+static int debounceMs = 500;
 
 int main(void) {
   std::signal(SIGINT, signalHandler);
@@ -75,7 +77,7 @@ int main(void) {
     for (auto &combo : combos) {
       bool match = true;
       for (auto &k : combo.keys) { if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; } }
-      if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
+      if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
@@ -97,7 +99,7 @@ int main(void) {
       for (auto &combo : combos) {
         bool match = true;
         for (auto &k : combo.keys) { if (!keyState[keycodes[k]]) { match = false; break; } }
-        if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
+        if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
       }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -116,8 +118,10 @@ static inline void loadConfig(void) {
   if (!cfgFile) { std::cerr << "Could not open " << configHome << "\n"; exit(EXIT_FAILURE); }
   json cfg;
   cfgFile >> cfg;
+  debounceMs = cfg["sleep"]["debounceMs"].get<int>();
   for (auto &c : cfg["combos"]) {
     Combo combo;
+    combo.debounce = debounceMs;
     combo.keys = c["keys"].get<std::vector<std::string>>();
     combo.command = c["command"].get<std::string>();
     combos.push_back(combo);
