@@ -9,11 +9,7 @@
     },
     {
       "keys": ["SPACE"],
-      "command": "notepad"
-    },
-    {
-      "keys": ["CTRL", "K"],
-      "command": "explorer"
+      "command": "echo Spacebar pressed!"
     }
   ],
   "keycodes": {
