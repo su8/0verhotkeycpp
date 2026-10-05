@@ -22,6 +22,8 @@ sudo make install
 sudo make uninstall
 ```
 
+## Don't forget to copy `.0verhotkeycpp_config.json` to your /root/ folder if on Linux
+
 ---
 
 Windows users
