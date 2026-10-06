@@ -165,6 +165,7 @@ static inline std::string findKeyboardDevice(void) {
           std::string devName(name);
           if (devName.rfind("Keyboard") != std::string::npos || devName.rfind("keyboard") != std::string::npos) { close(fd); return fullPath; }
         }
+        close(fd);
       }
     }
   }
