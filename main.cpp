@@ -158,12 +158,11 @@ static inline std::string findKeyboardDevice(void) {
   char name[256] = {'\0'};
   for (const auto &entry : fs::directory_iterator(std::string("/dev/input/"))) {
     if (strncmp(entry.path().filename().string().c_str(), "event", 5) == 0) {
-      std::string fullPath = entry.path().string();
-      int fd = open(fullPath.c_str(), O_RDONLY);
+      int fd = open(entry.path().string().c_str(), O_RDONLY);
       if (fd >= 0) {
         if (ioctl(fd, EVIOCGNAME(sizeof(name)), name) >= 0) {
           std::string devName(name);
-          if (devName.rfind("Keyboard") != std::string::npos || devName.rfind("keyboard") != std::string::npos) { close(fd); return fullPath; }
+          if (devName.rfind("Keyboard") != std::string::npos || devName.rfind("keyboard") != std::string::npos) { close(fd); return entry.path().string(); }
         }
         close(fd);
       }
