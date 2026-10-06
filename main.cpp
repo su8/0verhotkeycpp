@@ -155,34 +155,20 @@ static inline void launchCommandThread(const std::string &cmd) {
 
 #ifdef __linux__
 static inline std::string findKeyboardDevice(void) {
-  const char *devPath = "/dev/input/";
-  DIR *dir = opendir(devPath);
-  if (!dir) return "";
-  struct dirent *entry;
-  char name[256];
-  while ((entry = readdir(dir)) != nullptr) {
-    if (strncmp(entry->d_name, "event", 5) == 0) {
-      std::string fullPath = std::string(devPath) + entry->d_name;
+  char name[256] = {'\0'};
+  for (const auto &entry : fs::directory_iterator(std::string("/dev/input/"))) {
+    if (strncmp(entry.path().filename().string().c_str(), "event", 5) == 0) {
+      std::string fullPath = entry.path().string();
       int fd = open(fullPath.c_str(), O_RDONLY);
       if (fd >= 0) {
         if (ioctl(fd, EVIOCGNAME(sizeof(name)), name) >= 0) {
           std::string devName(name);
-          if (devName.find("Keyboard") != std::string::npos || devName.find("keyboard") != std::string::npos) { close(fd); closedir(dir); return fullPath; }
+          if (devName.rfind("Keyboard") != std::string::npos || devName.rfind("keyboard") != std::string::npos) { close(fd); return fullPath; }
         }
-      close(fd);
       }
     }
   }
-  closedir(dir);
-
-  const char *path = "/dev/input/by-id/";
-  DIR *dir2 = opendir(path);
-  if (!dir2) return "";
-  while ((entry = readdir(dir2)) != nullptr) {
-    std::string name2(entry->d_name);
-    if (name2.find("kbd") != std::string::npos) { closedir(dir2); return std::string(path) + name2; }
-  }
-  closedir(dir2);
+  for (const auto &entry : fs::directory_iterator(std::string("/dev/input/by-id/"))) { if (entry.path().string().rfind("kbd") != std::string::npos) { return entry.path().string(); } }
   return "";
 }
 #endif /* __linux__ */
