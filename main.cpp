@@ -64,8 +64,9 @@ static std::mutex cmdMutex;
 static std::vector<std::thread> runningThreads;
 static std::atomic<bool> stopFlag(false);
 static int debounceMs = 500;
+static int arg = 0;
 
-int main(void) {
+int main(int argc, char *argv[]) {
   std::signal(SIGINT, signalHandler);
   loadConfig();
   uintmax_t x = 0U;
@@ -81,14 +82,17 @@ int main(void) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 #else
-  std::string device = findKeyboardDevice();
+  std::string device;
+  arg = argc;
+  if (argc >= 2) { device = argv[1]; }
+  else { device = findKeyboardDevice(); }
   if (device.empty()) { std::cerr << "No keyboard device found. Try running as root.\n"; return EXIT_FAILURE; }
   std::cout << "Using device: " << device << "\n";
   int fd = open(device.c_str(), O_RDONLY | O_NONBLOCK);
   if (fd < 0) { perror("open"); return EXIT_FAILURE; }
   std::map<int,bool> keyState;
   struct input_event ev;
-  std::cout << "Listening for (Linux /dev/input)...\n";
+  std::cout << "Listening (Linux)...\n";
   while (!stopFlag.load()) {
     checkIfConfigHasToBeReloaded();
     ssize_t n = read(fd, &ev, sizeof(ev));
@@ -155,6 +159,7 @@ static inline void launchCommandThread(const std::string &cmd) {
 
 #ifdef __linux__
 static inline std::string findKeyboardDevice(void) {
+  if (arg >= 2) { return ""; }
   char name[256] = {'\0'};
   for (const auto &entry : fs::directory_iterator(std::string("/dev/input/"))) {
     if (strncmp(entry.path().filename().string().c_str(), "event", 5) == 0) {

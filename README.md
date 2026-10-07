@@ -102,7 +102,8 @@ Limitations
 Hotkey can only listen on a single device file. If you want to listen on
 multiple device files, just configure and install it multiple times under
 different names. This way, you can have completely different configurations for
-each keyboard you have.
+each keyboard you have. Or just supply argument with the keyboard device in 
+**Linux** like this `sudo 0verhotkey++ /dev/input/event13` where `event13` is your other keyboard.
 
 Hotkey will only listen for `EV_KEY` events. This is by design; keyboards
 generally don't emit any other events. You should probably use something like
