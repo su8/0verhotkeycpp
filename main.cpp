@@ -64,9 +64,9 @@ static std::mutex cmdMutex;
 static std::vector<std::thread> runningThreads;
 static std::atomic<bool> stopFlag(false);
 static int debounceMs = 500;
-static int arg = 0;
 
 int main(int argc, char *argv[]) {
+  static_cast<void>(argc); static_cast<void>(argv);
   std::signal(SIGINT, signalHandler);
   loadConfig();
   uintmax_t x = 0U;
@@ -83,7 +83,6 @@ int main(int argc, char *argv[]) {
   }
 #else
   std::string device;
-  arg = argc;
   if (argc >= 2) { device = argv[1]; }
   else { device = findKeyboardDevice(); }
   if (device.empty()) { std::cerr << "No keyboard device found. Try running as root.\n"; return EXIT_FAILURE; }
@@ -159,7 +158,6 @@ static inline void launchCommandThread(const std::string &cmd) {
 
 #ifdef __linux__
 static inline std::string findKeyboardDevice(void) {
-  if (arg >= 2) { return ""; }
   char name[256] = {'\0'};
   for (const auto &entry : fs::directory_iterator(std::string("/dev/input/"))) {
     if (strncmp(entry.path().filename().string().c_str(), "event", 5) == 0) {
