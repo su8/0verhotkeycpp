@@ -50,8 +50,8 @@ static std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("
 static inline void loadConfig(void);
 static inline void checkIfConfigHasToBeReloaded(void);
 static inline void launchCommandThread(const std::string &cmd);
-static void signalHandler(void);
-static void signalHandler2(int signum);
+static void atExitSignalHandler(void);
+static void OnSIGINTsignalHandler(int signum);
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
@@ -68,8 +68,8 @@ static int debounceMs = 500;
 
 int main(int argc, char *argv[]) {
   static_cast<void>(argc); static_cast<void>(argv);
-  std::atexit(signalHandler);
-  std::signal(SIGINT, signalHandler2);
+  std::atexit(atExitSignalHandler);
+  std::signal(SIGINT, OnSIGINTsignalHandler);
   loadConfig();
   uintmax_t x = 0U;
 #ifdef _WIN32
@@ -113,8 +113,8 @@ int main(int argc, char *argv[]) {
   return EXIT_SUCCESS;
 }
 
-static void signalHandler(void) { stopFlag.store(true); }
-static void signalHandler2(int signum) { static_cast<void>(signum); stopFlag.store(true); }
+static void atExitSignalHandler(void) { stopFlag.store(true); }
+static void OnSIGINTsignalHandler(int signum) { static_cast<void>(signum); stopFlag.store(true); }
 
 static inline void loadConfig(void) {
   std::ifstream cfgFile(configHome);
