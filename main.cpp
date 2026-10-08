@@ -96,8 +96,8 @@ int main(int argc, char *argv[]) {
   std::cout << "Listening (Linux)...\n";
   while (!stopFlag.load()) {
     checkIfConfigHasToBeReloaded();
-    ssize_t n = read(fd, &ev, sizeof(ev));
-    if (n != sizeof(ev)) { continue; }
+    ssize_t bytesRead = read(fd, &ev, sizeof(ev));
+    if (bytesRead != sizeof(ev)) { continue; }
     if (ev.type == EV_KEY) {
       keyState[ev.code] = (ev.value != 0);
       for (auto &combo : combos) {
