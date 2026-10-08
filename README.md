@@ -9,6 +9,8 @@ Configuration
 
 Edit the `.0verhotkeycpp_config.json` file to your heart's desire. Use the provided **printkey.cpp** if on `Windows` to get the numbers behind the desired keys, if on linux see `/usr/include/linux/input-event-codes.h` , optionally you can install `evtest` and press the desired keyboard key(s).
 
+In **Linux** you can `sudo visudo` and type the `0verhotkeycpp` in there to launch it without the need for the root password. You can start the program within `.xinitrc` or other file used to start your Window Manager. Eventually you can have it auto start from your `init` system.
+
 Compile
 -------
 
