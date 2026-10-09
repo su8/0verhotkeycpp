@@ -48,7 +48,6 @@ namespace fs = std::filesystem;
 using json = nlohmann::json;
 
 static inline bool match_sequence(const std::vector<unsigned char> &input, const std::vector<unsigned char> &pattern);
-static inline void rawMode(void);
 static inline std::vector<unsigned char> keyToSequence(const std::string &s);
 static inline std::vector<KeyCombo> loadCombosJson(const std::string &filename);
 static inline void checkIfConfigHasToBeReloaded(void);
@@ -116,17 +115,6 @@ int main(void) {
 
 static void atExitSignalHandler(void) { tcsetattr(STDIN_FILENO, TCSANOW, &origTermios); stopFlag.store(true); }
 static void OnSIGINTsignalHandler(int signum) { static_cast<void>(signum); tcsetattr(STDIN_FILENO, TCSANOW, &origTermios); stopFlag.store(true); }
-
-void rawMode(void) {
-  struct termios raw;
-  if (tcgetattr(STDIN_FILENO, &origTermios) == -1) { perror("tcgetattr"); exit(EXIT_FAILURE); }
-  raw = origTermios;
-  raw.c_lflag &= ~(ICANON | ECHO | IEXTEN);
-  raw.c_iflag &= ~(IXON | ICRNL | BRKINT | INPCK | ISTRIP);
-  raw.c_cc[VMIN] = 1;
-  raw.c_cc[VTIME] = 0;
-  if (tcsetattr(STDIN_FILENO, TCSANOW, &raw) == -1) { perror("tcsetattr"); exit(EXIT_FAILURE); }
-}
 
 bool match_sequence(const std::vector<unsigned char> &input, const std::vector<unsigned char> &pattern) { return input == pattern; }
 
