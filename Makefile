@@ -19,6 +19,9 @@ LDFLAGS+=-pthread
 PACKAGE=0verhotkey++
 PROG=main.cpp
 
+BSD:
+	$(CXX) -o $(PACKAGE) mainBSD.cpp $(CFLAGS) $(LDFLAGS)
+
 all:
 	$(CXX) -o $(PACKAGE) $(PROG) $(CFLAGS) $(LDFLAGS)
 
@@ -31,4 +34,4 @@ clean:
 uninstall:
 	rm -f /usr/bin/$(PACKAGE)
 
-.PHONY: all install clean uninstall
+.PHONY: BSD all install clean uninstall
