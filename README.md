@@ -7,24 +7,30 @@ launching a command.
 Configuration
 -------------
 
-Edit the `.0verhotkeycpp_config.json` file to your heart's desire. Use the provided **printkey.cpp** if on `Windows` to get the numbers behind the desired keys, if on linux see `/usr/include/linux/input-event-codes.h` , optionally you can install `evtest` and press the desired keyboard key(s).
+Edit the `.0verhotkeycpp_config.json` or the `BSD` config one, edit the file(s) to your heart's desire. Use the provided **printkey.cpp** if on `Windows` to get the numbers behind the desired keys, if on linux see `/usr/include/linux/input-event-codes.h` , optionally you can install `evtest` and press the desired keyboard key(s).
 
 In **Linux** you can `sudo visudo` and type the `0verhotkeycpp` in there to launch it without the need for the root password. You can start the program within `.xinitrc` or other file used to start your Window Manager. Eventually you can have it auto start from your `init` system.
 
 Compile
 -------
 
-If on **Linux** compile with:
+If on **Linux** or **BSD** or **Mac** compile with:
 
 ```bash
+# linux
 make -j8 # 8 cores/threads to use in parallel compile
+
+# BSD/Mac
+make BSD -j8 # 8 cores/threads to use in parallel compile
+
+# to isntall the binary
 sudo make install
 
 # to uninstall it
 sudo make uninstall
 ```
 
-## Don't forget to copy `.0verhotkeycpp_config.json` to your /root/ folder if on Linux
+## Don't forget to copy `.0verhotkeycpp_config.json` or the **BSD** config to your /root/ folder if on Linux/BSD/Mac
 
 ---
 

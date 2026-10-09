@@ -1,0 +1,7 @@
+{
+  "combos": [
+    { "keys": ["\\u001B[1;5A"], "command": "echo 'Ctrl+Up Arrow detected!'" },
+    { "keys": ["Ctrl+V"], "command": "thunar" },
+    { "keys": ["Ctrl+K"], "command": "xfce4-terminal" }
+  ]
+}
