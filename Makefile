@@ -19,14 +19,14 @@ LDFLAGS+=-pthread
 PACKAGE=0verhotkey++
 PROG=main.cpp
 
+all:
+	$(CXX) -o $(PACKAGE) $(PROG) $(CFLAGS) $(LDFLAGS)
+
 XCB:
 	$(CXX) -o $(PACKAGE) mainXCB.cpp $(CFLAGS) $(LDFLAGS) -lxcb -lxcb-keysyms -lX11
 
 BSD:
 	$(CXX) -o $(PACKAGE) mainBSD.cpp $(CFLAGS) $(LDFLAGS)
-
-all:
-	$(CXX) -o $(PACKAGE) $(PROG) $(CFLAGS) $(LDFLAGS)
 
 install: 
 	install -D -s -m 755 $(PACKAGE) /usr/bin/$(PACKAGE)
