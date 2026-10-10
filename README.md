@@ -9,7 +9,7 @@ Configuration
 
 Edit the `.0verhotkeycpp_config.json` or the `BSD` config one, edit the file(s) to your heart's desire. Use the provided **printkey.cpp** if on `Windows` to get the numbers behind the desired keys, if on linux see `/usr/include/linux/input-event-codes.h` , optionally you can install `evtest` and press the desired keyboard key(s).
 
-In **Linux** you can `sudo visudo` and type the `0verhotkeycpp` in there to launch it without the need for the root password. You can start the program within `.xinitrc` or other file used to start your Window Manager. Eventually you can have it auto start from your `init` system.
+In **Linux** you can `sudo visudo` and type the `0verhotkey++` in there to launch it without the need for the root password. You can start the program within `.xinitrc` or other file used to start your Window Manager. Eventually you can have it auto start from your `init` system.
 
 Compile
 -------
@@ -110,17 +110,3 @@ Optioanlly if you want to play around with the code from VSCode's console -- wai
 Copy `.0verhotkeycpp_config.json` to `C:\MingW\bin` before starting the program for very first time. If you do other changes to `.0verhotkeycpp_config.json` make sure to copy it to the `MingW\bin` folder again, or just edit the **MingW** config one.
 
 There is a **.bat** script that you can use to launch the program, instead doing it manually or from the VSCode editor.
-
-Limitations
------------
-
-Hotkey can only listen on a single device file. If you want to listen on
-multiple device files, just configure and install it multiple times under
-different names. This way, you can have completely different configurations for
-each keyboard you have. Or just supply argument with the keyboard device in 
-**Linux** like this `sudo 0verhotkey++ /dev/input/event13` where `event13` is your other keyboard.
-
-Hotkey will only listen for `EV_KEY` events. This is by design; keyboards
-generally don't emit any other events. You should probably use something like
-acpid for listening to lid events and the like, but it's trivial to change which
-event(s) Hotkey listens to.
