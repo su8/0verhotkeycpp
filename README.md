@@ -21,7 +21,7 @@ If on **Linux** or **BSD** or **Mac** compile with:
 make XCB -j8 # 8 cores/threads to use in parallel compile
 
 # will default to e.g. /dev/input/event0 listener and keyboard detection (Linux and Windows)
-make devInput -j8
+make -j8
 
 # BSD/Mac, on BSD you can still use the XCB version
 make BSD -j8 # 8 cores/threads to use in parallel compile
