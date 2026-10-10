@@ -12,6 +12,11 @@
       "name": "Xfce Terminal",
       "keys": ["CTRL", "V"],
       "command": "xfce4-terminal"
+    },
+    {
+      "name": "exit",
+      "keys": ["CTRL", "C"],
+      "command": "exit"
     }
   ]
 }

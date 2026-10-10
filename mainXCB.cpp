@@ -76,10 +76,10 @@ int main(void) {
   xcb_screen_t *screen = iter.data;
   keysyms = xcb_key_symbols_alloc(conn);
   combos = loadConfig();
-  for (auto &sc : combos) {
-    xcb_grab_key(conn, 1, screen->root, sc.modifiers, sc.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-    xcb_grab_key(conn, 1, screen->root, sc.modifiers | XCB_MOD_MASK_LOCK, sc.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-    xcb_grab_key(conn, 1, screen->root, sc.modifiers | XCB_MOD_MASK_2, sc.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+  for (auto &key : combos) {
+    xcb_grab_key(conn, 1, screen->root, key.modifiers, key.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+    xcb_grab_key(conn, 1, screen->root, key.modifiers | XCB_MOD_MASK_LOCK, key.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+    xcb_grab_key(conn, 1, screen->root, key.modifiers | XCB_MOD_MASK_2, key.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
   }
   xcb_flush(conn);
   std::cout << "Listening for keys...\n";
@@ -89,16 +89,18 @@ int main(void) {
     if (type == XCB_KEY_PRESS) {
       xcb_key_press_event_t *kp = reinterpret_cast<xcb_key_press_event_t *>(event);
       xcb_keysym_t keysym = xcb_key_symbols_get_keysym(keysyms, kp->detail, 0);
-      if (keysym == XK_Escape) { free(event); break; }
-      for (auto &sc : combos) {
-        if (kp->detail == sc.keycode && (kp->state & (XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_CONTROL | XCB_MOD_MASK_1)) == sc.modifiers) {
-          std::cout << "Key(s) detected: " << sc.name << " → launching " << sc.command << "\n";
-          launchCommandThread(sc.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++;
+      if (keysym == XK_Escape) { stopFlag.store(true); free(event); break; }
+      for (auto &key : combos) {
+        if (kp->detail == key.keycode && (kp->state & (XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_CONTROL | XCB_MOD_MASK_1)) == key.modifiers) {
+          if (key.name == "exit") { stopFlag.store(true); free(event); goto out; }
+          std::cout << "Key(s) detected: " << key.name << " → launching " << key.command << "\n";
+          launchCommandThread(key.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++;
         }
       }
     }
     free(event);
   }
+out:
   xcb_key_symbols_free(keysyms);
   xcb_disconnect(conn);
   return EXIT_SUCCESS;
@@ -139,10 +141,10 @@ static inline std::vector<Combo> loadConfig(void) {
   cfgFile >> config;
   std::vector<Combo> combosLoad;
   debounceMs = config["sleep"]["debounceMs"].get<int>();
-  for (auto &sc : config["combos"]) {
+  for (auto &combo : config["combos"]) {
     uint16_t mods = 0;
     KeySym ks = 0;
-    for (auto &key : sc["keys"]) {
+    for (auto &key : combo["keys"]) {
       std::string k = key.get<std::string>();
       uint16_t mask = modifierNameToMask(k);
       if (mask) { mods |= mask; }
@@ -150,7 +152,7 @@ static inline std::vector<Combo> loadConfig(void) {
     }
     xcb_keycode_t *codes = xcb_key_symbols_get_keycode(keysyms, ks);
     if (!codes) { std::cerr << "Invalid key: " << ks << "\n"; continue; }
-    combosLoad.push_back({sc["name"], mods, codes[0], sc["command"].get<std::string>()});
+    combosLoad.push_back({combo["name"], mods, codes[0], combo["command"].get<std::string>()});
     free(codes);
   }
   return combosLoad;
