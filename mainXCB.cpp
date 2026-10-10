@@ -58,7 +58,7 @@ static std::vector<ShortCut> loadShortCuts(void);
 static std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("HOME")) + std::string("/") : std::string("./")) + ".0verhotkeycpp_XCB_config.json";
 static std::mutex cmdMutex;
 static std::vector<std::thread> runningThreads;
-std::vector<ShortCut> shortCuts;
+static std::vector<ShortCut> shortCuts;
 static std::atomic<bool> stopFlag(false);
 static int debounceMs = 500;
 static xcb_connection_t *conn;
