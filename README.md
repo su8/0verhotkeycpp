@@ -17,10 +17,13 @@ Compile
 If on **Linux** or **BSD** or **Mac** compile with:
 
 ```bash
-# linux
+# will default to XCB
 make -j8 # 8 cores/threads to use in parallel compile
 
-# BSD/Mac
+# will default to e.g. /dev/input/event0 listener and keyboard detection (Linux and Windows)
+make devInput -j8
+
+# BSD/Mac, on BSD you can still use the XCB version
 make BSD -j8 # 8 cores/threads to use in parallel compile
 
 # to isntall the binary
@@ -29,6 +32,10 @@ sudo make install
 # to uninstall it
 sudo make uninstall
 ```
+
+If you choose the `XCB` version you must install xcb and x11/xorg, in Debian it's `sudo apt install libxcb1-dev libxcb-keysyms1-dev`
+
+---
 
 ## Don't forget to copy `.0verhotkeycpp_config.json` or the **BSD** config to your /root/ folder if on Linux/BSD/Mac
 

@@ -19,6 +19,9 @@ LDFLAGS+=-pthread
 PACKAGE=0verhotkey++
 PROG=main.cpp
 
+XCB:
+	$(CXX) -o $(PACKAGE) mainXCB.cpp $(CFLAGS) $(LDFLAGS) -lxcb -lxcb-keysyms -lX11
+
 BSD:
 	$(CXX) -o $(PACKAGE) mainBSD.cpp $(CFLAGS) $(LDFLAGS)
 
@@ -34,4 +37,4 @@ clean:
 uninstall:
 	rm -f /usr/bin/$(PACKAGE)
 
-.PHONY: BSD all install clean uninstall
+.PHONY: XCB BSD all install clean uninstall
