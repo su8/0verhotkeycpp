@@ -33,7 +33,7 @@ sudo make install
 sudo make uninstall
 ```
 
-If you choose the `XCB` version you must install xcb and x11/xorg, in Debian it's `sudo apt install libxcb1-dev libxcb-keysyms1-dev`
+If you choose the `XCB` version you must install xcb and x11/xorg, in Debian it's `sudo apt install libxcb1-dev libxcb-keysyms1-dev libx11-dev`
 
 ---
 
