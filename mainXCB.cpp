@@ -67,12 +67,12 @@ int main(void) {
   std::atexit(atExitSignalHandler);
   std::signal(SIGINT, OnSIGINTsignalHandler);
   uintmax_t x = 0U;
-  int screen_num;
-  conn = xcb_connect(nullptr, &screen_num);
+  int screenNum;
+  conn = xcb_connect(nullptr, &screenNum);
   if (xcb_connection_has_error(conn)) { std::cerr << "Cannot connect to X server\n"; return EXIT_FAILURE; }
   const xcb_setup_t *setup = xcb_get_setup(conn);
   xcb_screen_iterator_t iter = xcb_setup_roots_iterator(setup);
-  for (int z = 0; z < screen_num; z++) { xcb_screen_next(&iter); }
+  for (int z = 0; z < screenNum; z++) { xcb_screen_next(&iter); }
   xcb_screen_t *screen = iter.data;
   keysyms = xcb_key_symbols_alloc(conn);
   combos = loadConfig();
@@ -87,7 +87,9 @@ int main(void) {
   while ((event = xcb_wait_for_event(conn)) && !stopFlag.load()) {
     uint8_t type = event->response_type & ~0x80;
     if (type == XCB_KEY_PRESS) {
-      xcb_key_press_event_t *kp = (xcb_key_press_event_t *)event;
+      xcb_key_press_event_t *kp = reinterpret_cast<xcb_key_press_event_t *>(event);
+      xcb_keysym_t keysym = xcb_key_symbols_get_keysym(keysyms, kp->detail, 0);
+      if (keysym == XK_Escape) { free(event); break; }
       for (auto &sc : combos) {
         if (kp->detail == sc.keycode && (kp->state & (XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_CONTROL | XCB_MOD_MASK_1)) == sc.modifiers) {
           std::cout << "Key(s) detected: " << sc.name << " → launching " << sc.command << "\n";
