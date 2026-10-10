@@ -18,7 +18,7 @@ If on **Linux** or **BSD** or **Mac** compile with:
 
 ```bash
 # will default to XCB
-make -j8 # 8 cores/threads to use in parallel compile
+make XCB -j8 # 8 cores/threads to use in parallel compile
 
 # will default to e.g. /dev/input/event0 listener and keyboard detection (Linux and Windows)
 make devInput -j8
