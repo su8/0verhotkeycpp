@@ -13,5 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: install deps.
+      run: sudo apt install libxcb1-dev libxcb-keysyms1-dev
     - name: make -j8
       run: make -j8
