@@ -1,14 +1,17 @@
 {
-    "shortcuts": [
-        {
-            "name": "File Manager",
-            "keys": ["CTRL", "SHIFT", "X"],
-            "command": "thunar"
-        },
-        {
-            "name": "Xfce Terminal",
-            "keys": ["CTRL", "V"],
-            "command": "xfce4-terminal"
-        }
-    ]
+  "sleep": {
+    "debounceMs": 500
+  },
+  "shortcuts": [
+    {
+      "name": "File Manager",
+      "keys": ["CTRL", "SHIFT", "X"],
+      "command": "thunar"
+    },
+    {
+      "name": "Xfce Terminal",
+      "keys": ["CTRL", "V"],
+      "command": "xfce4-terminal"
+    }
+  ]
 }

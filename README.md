@@ -26,7 +26,7 @@ make -j8
 # BSD/Mac, on BSD you can still use the XCB version
 make BSD -j8 # 8 cores/threads to use in parallel compile
 
-# to isntall the binary
+# to install the binary
 sudo make install
 
 # to uninstall it

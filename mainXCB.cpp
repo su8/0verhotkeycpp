@@ -17,6 +17,8 @@
  */
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <thread>
@@ -30,9 +32,6 @@
 #include <atomic>
 #include <algorithm>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sstream>
-#include <cstring>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -82,10 +81,8 @@ int main(void) {
   shortCuts = loadShortCuts();
   for (auto &sc : shortCuts) {
     xcb_grab_key(conn, 1, screen->root, sc.modifiers, sc.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-    xcb_grab_key(conn, 1, screen->root, sc.modifiers | XCB_MOD_MASK_LOCK, sc.keycode,
- XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-    xcb_grab_key(conn, 1, screen->root, sc.modifiers | XCB_MOD_MASK_2, sc.keycode,
- XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+    xcb_grab_key(conn, 1, screen->root, sc.modifiers | XCB_MOD_MASK_LOCK, sc.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+    xcb_grab_key(conn, 1, screen->root, sc.modifiers | XCB_MOD_MASK_2, sc.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
   }
   xcb_flush(conn);
   std::cout << "Listening for shortcuts...\n";
@@ -110,7 +107,6 @@ int main(void) {
 
 static void atExitSignalHandler(void) { stopFlag.store(true); }
 static void OnSIGINTsignalHandler(int signum) { static_cast<void>(signum); stopFlag.store(true); }
-
 
 uint16_t modifierNameToMask(const std::string &mod) {
   if (mod == "CTRL") return XCB_MOD_MASK_CONTROL;
@@ -143,6 +139,7 @@ static std::vector<ShortCut> loadShortCuts(void) {
   json config;
   file >> config;
   std::vector<ShortCut> shortCutsLoad;
+  debounceMs = config["sleep"]["debounceMs"].get<int>();
   for (auto &sc : config["shortcuts"]) {
     uint16_t mods = 0;
     KeySym ks = 0;
