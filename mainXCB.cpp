@@ -24,14 +24,11 @@
 #include <thread>
 #include <chrono>
 #include <cstdlib>
-#include <map>
-#include <set>
 #include <mutex>
 #include <filesystem>
 #include <csignal>
 #include <atomic>
 #include <algorithm>
-#include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -41,7 +38,7 @@
 #include <X11/keysym.h>
 #include "json.hpp"
 
-struct ShortCut {
+struct Combo {
   std::string name;
   uint16_t modifiers;
   xcb_keycode_t keycode;
@@ -53,12 +50,12 @@ static void OnSIGINTsignalHandler(int signum);
 static inline uint16_t modifierNameToMask(const std::string &mod);
 static inline void checkIfConfigHasToBeReloaded(void);
 static inline void launchCommandThread(const std::string &cmd);
-static std::vector<ShortCut> loadShortCuts(void);
+static std::vector<Combo> loadConfig(void);
 
 static std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("HOME")) + std::string("/") : std::string("./")) + ".0verhotkeycpp_XCB_config.json";
 static std::mutex cmdMutex;
 static std::vector<std::thread> runningThreads;
-static std::vector<ShortCut> shortCuts;
+static std::vector<Combo> combos;
 static std::atomic<bool> stopFlag(false);
 static int debounceMs = 500;
 static xcb_connection_t *conn;
@@ -78,22 +75,22 @@ int main(void) {
   for (int z = 0; z < screen_num; z++) { xcb_screen_next(&iter); }
   xcb_screen_t *screen = iter.data;
   keysyms = xcb_key_symbols_alloc(conn);
-  shortCuts = loadShortCuts();
-  for (auto &sc : shortCuts) {
+  combos = loadConfig();
+  for (auto &sc : combos) {
     xcb_grab_key(conn, 1, screen->root, sc.modifiers, sc.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
     xcb_grab_key(conn, 1, screen->root, sc.modifiers | XCB_MOD_MASK_LOCK, sc.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
     xcb_grab_key(conn, 1, screen->root, sc.modifiers | XCB_MOD_MASK_2, sc.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
   }
   xcb_flush(conn);
-  std::cout << "Listening for shortcuts...\n";
+  std::cout << "Listening for keys...\n";
   xcb_generic_event_t *event;
   while ((event = xcb_wait_for_event(conn)) && !stopFlag.load()) {
     uint8_t type = event->response_type & ~0x80;
     if (type == XCB_KEY_PRESS) {
       xcb_key_press_event_t *kp = (xcb_key_press_event_t *)event;
-      for (auto &sc : shortCuts) {
+      for (auto &sc : combos) {
         if (kp->detail == sc.keycode && (kp->state & (XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_CONTROL | XCB_MOD_MASK_1)) == sc.modifiers) {
-          std::cout << "Shortcut detected: " << sc.name << " → launching " << sc.command << "\n";
+          std::cout << "Key(s) detected: " << sc.name << " → launching " << sc.command << "\n";
           launchCommandThread(sc.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++;
         }
       }
@@ -112,15 +109,15 @@ uint16_t modifierNameToMask(const std::string &mod) {
   if (mod == "CTRL") return XCB_MOD_MASK_CONTROL;
   if (mod == "SHIFT") return XCB_MOD_MASK_SHIFT;
   if (mod == "ALT") return XCB_MOD_MASK_1;
-   return 0;
+  return 0;
 }
 
 static inline void checkIfConfigHasToBeReloaded(void) {
   static auto oldTime = fs::last_write_time(configHome);
   auto newTime = fs::last_write_time(configHome);
   if (newTime != oldTime) {
-    shortCuts.clear();
-    shortCuts = loadShortCuts();
+    combos.clear();
+    combos = loadConfig();
     oldTime = newTime;
   }
 }
@@ -133,14 +130,14 @@ static inline void launchCommandThread(const std::string &cmd) {
   });
 }
 
-static std::vector<ShortCut> loadShortCuts(void) {
-  std::ifstream file(configHome);
-   if (!file) { std::cerr << "Error: Could not open " << configHome << "\n"; exit(EXIT_FAILURE); }
+static inline std::vector<Combo> loadConfig(void) {
+  std::ifstream cfgFile(configHome);
+   if (!cfgFile) { std::cerr << "Error: Could not open " << configHome << "\n"; exit(EXIT_FAILURE); }
   json config;
-  file >> config;
-  std::vector<ShortCut> shortCutsLoad;
+  cfgFile >> config;
+  std::vector<Combo> combosLoad;
   debounceMs = config["sleep"]["debounceMs"].get<int>();
-  for (auto &sc : config["shortcuts"]) {
+  for (auto &sc : config["combos"]) {
     uint16_t mods = 0;
     KeySym ks = 0;
     for (auto &key : sc["keys"]) {
@@ -151,8 +148,8 @@ static std::vector<ShortCut> loadShortCuts(void) {
     }
     xcb_keycode_t *codes = xcb_key_symbols_get_keycode(keysyms, ks);
     if (!codes) { std::cerr << "Invalid key: " << ks << "\n"; continue; }
-    shortCutsLoad.push_back({sc["name"], mods, codes[0], sc["command"].get<std::string>()});
+    combosLoad.push_back({sc["name"], mods, codes[0], sc["command"].get<std::string>()});
     free(codes);
   }
-  return shortCutsLoad;
+  return combosLoad;
 }

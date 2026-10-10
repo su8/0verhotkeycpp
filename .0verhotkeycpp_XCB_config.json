@@ -2,7 +2,7 @@
   "sleep": {
     "debounceMs": 500
   },
-  "shortcuts": [
+  "combos": [
     {
       "name": "File Manager",
       "keys": ["CTRL", "SHIFT", "X"],
