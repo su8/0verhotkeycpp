@@ -75,6 +75,7 @@ int main(void) {
   for (int z = 0; z < screenNum; z++) { xcb_screen_next(&iter); }
   xcb_screen_t *screen = iter.data;
   keysyms = xcb_key_symbols_alloc(conn);
+  if (!keysyms) { std::cerr << "Error: Cannot find any locale." << std::endl; xcb_disconnect(conn); return EXIT_FAILURE; }
   combos = loadConfig();
   for (auto &key : combos) {
     xcb_grab_key(conn, 1, screen->root, key.modifiers, key.keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
