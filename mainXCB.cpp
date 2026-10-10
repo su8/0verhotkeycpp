@@ -17,8 +17,6 @@
  */
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <cstring>
 #include <string>
 #include <vector>
 #include <thread>
@@ -29,9 +27,6 @@
 #include <csignal>
 #include <atomic>
 #include <algorithm>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
 #include <X11/Xlib.h>
@@ -86,6 +81,7 @@ int main(void) {
   std::cout << "Listening for keys...\n";
   xcb_generic_event_t *event;
   while ((event = xcb_wait_for_event(conn)) && !stopFlag.load()) {
+    checkIfConfigHasToBeReloaded();
     uint8_t type = event->response_type & ~0x80;
     if (type == XCB_KEY_PRESS) {
       xcb_key_press_event_t *kp = reinterpret_cast<xcb_key_press_event_t *>(event);
