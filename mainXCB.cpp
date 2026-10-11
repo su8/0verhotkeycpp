@@ -37,7 +37,7 @@ struct Combo {
   std::string name;
   uint16_t modifiers;
   xcb_keycode_t keycode;
-  std::string command;
+  std::vector<std::string> commands;
 };
 
 static void atExitSignalHandler(void);
@@ -90,8 +90,7 @@ int main(void) {
       for (auto &key : combos) {
         if (kp->detail == key.keycode && (kp->state & (XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_CONTROL | XCB_MOD_MASK_1)) == key.modifiers) {
           if (key.name == "exit") { stopFlag.store(true); free(event); goto out; }
-          std::cout << "Key(s) detected: " << key.name << " → launching " << key.command << "\n";
-          launchCommandThread(key.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++;
+          for (const auto &cmd : key.commands) { std::cout << "Key(s) detected: " << key.name << " → launching " << cmd << "\n"; launchCommandThread(cmd); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
         }
       }
     }
@@ -137,6 +136,7 @@ static inline std::vector<Combo> loadConfig(void) {
   json config;
   cfgFile >> config;
   std::vector<Combo> combosLoad;
+  std::vector<std::string> commands;
   debounceMs = config["sleep"]["debounceMs"].get<int>();
   for (auto &combo : config["combos"]) {
     uint16_t mods = 0;
@@ -147,9 +147,10 @@ static inline std::vector<Combo> loadConfig(void) {
       if (mask) { mods |= mask; }
       else { ks = XStringToKeysym(k.c_str()); }
     }
+    commands = combo["commands"].get<std::vector<std::string>>();
     xcb_keycode_t *codes = xcb_key_symbols_get_keycode(keysyms, ks);
     if (!codes) { std::cerr << "Invalid key: " << ks << "\n"; continue; }
-    combosLoad.push_back({combo["name"], mods, codes[0], combo["command"].get<std::string>()});
+    combosLoad.push_back({combo["name"], mods, codes[0], commands});
     free(codes);
   }
   return combosLoad;
