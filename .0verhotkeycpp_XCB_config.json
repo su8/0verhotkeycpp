@@ -6,17 +6,17 @@
     {
       "name": "File Manager",
       "keys": ["CTRL", "SHIFT", "X"],
-      "command": ["thunar", "echo hi there"]
+      "commands": ["thunar", "echo hi there"]
     },
     {
       "name": "Xfce Terminal",
       "keys": ["CTRL", "V"],
-      "command": ["xfce4-terminal", "echo hello world"]
+      "commands": ["xfce4-terminal", "echo hello world"]
     },
     {
       "name": "exit",
       "keys": ["CTRL", "C"],
-      "command": ["exit", "quit"]
+      "commands": ["exit", "quit"]
     }
   ]
 }
