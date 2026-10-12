@@ -21,7 +21,7 @@ jobs:
       run: make XCB -j8
     - name: make BSD -j8
       run: make BSD -j8
-jobs2:
+jobs:
   build:
 
     runs-on: macos-latest
