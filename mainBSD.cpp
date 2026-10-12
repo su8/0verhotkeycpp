@@ -37,7 +37,7 @@
 struct termios origTermios;
 struct KeyCombo {
   std::vector<unsigned char> sequence;
-  std::string command;
+  std::vector<std::string> commands;
 };
 static std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("HOME")) + std::string("/") : std::string("./")) + ".0verhotkeycpp_BSD_config.json";
 static std::vector<KeyCombo> combos;
@@ -103,8 +103,7 @@ int main(void) {
         }
         for (const auto &combo : combos) {
           if (match_sequence(input_seq, combo.sequence)) {
-            std::cout << "Matched combo -> launching: " << combo.command << "\n";
-            launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++;
+            for (const auto &cmd : combo.commands) { std::cout << "Matched combo -> launching: " << cmd << "\n"; launchCommandThread(cmd.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(500)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
           }
         }
       }
@@ -169,7 +168,7 @@ std::vector<KeyCombo> loadCombosJson(const std::string &filename) {
         kc.sequence.push_back(static_cast<unsigned char>(key.get<int>()));
       }
     }
-    kc.command = combo["command"].get<std::string>();
+    kc.commands = combo["commands"].get<std::vector<std::string>>();
     combos.push_back(kc);
   }
   return combos;
