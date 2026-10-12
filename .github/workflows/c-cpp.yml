@@ -27,6 +27,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: make -XCB -j8
-      run: sudo port install xcb
+      run: curl -O https://distfiles.macports.org/MacPorts/MacPorts-2.12.6.tar.bz2;tar xf MacPorts-2.12.6.tar.bz2;cd MacPorts-2.12.6;./configure;make;sudo make install
     - name: make BSD -j8
       run: make BSD -j8
