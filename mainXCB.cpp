@@ -45,7 +45,7 @@ static void OnSIGINTsignalHandler(int signum);
 static inline uint16_t modifierNameToMask(const std::string &mod);
 static inline void checkIfConfigHasToBeReloaded(void);
 static inline void launchCommandThread(const std::string &cmd);
-static std::vector<Combo> loadConfig(void);
+static inline std::vector<Combo> loadConfig(void);
 
 static std::string configHome = (std::getenv("HOME") ? std::string(std::getenv("HOME")) + std::string("/") : std::string("./")) + ".0verhotkeycpp_XCB_config.json";
 static std::mutex cmdMutex;
