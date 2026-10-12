@@ -7,6 +7,19 @@ on:
     branches: [ main ]
 
 jobs:
+  my_first_job:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: make -j8
+      run: make -j8
+    - name: make BSD -j8
+      run: make BSD -j8
+
+  my_second_job:
   build:
 
     runs-on: ubuntu-latest
@@ -19,16 +32,5 @@ jobs:
       run: make -j8
     - name: make XCB -j8
       run: make XCB -j8
-    - name: make BSD -j8
-      run: make BSD -j8
-jobs:
-  build:
-
-    runs-on: macos-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: make -j8
-      run: make -j8
     - name: make BSD -j8
       run: make BSD -j8
