@@ -5,11 +5,11 @@
   "combos": [
     {
       "keys": ["CTRL", "ALT", "K"],
-      "command": "echo CTRL+ALT+K pressed!"
+      "command": ["echo CTRL+ALT+K pressed!", "echo hello world"]
     },
     {
       "keys": ["SPACE"],
-      "command": "echo Spacebar pressed!"
+      "command": ["echo Spacebar pressed!", "echo hi there"]
     }
   ],
   "keycodes": {
