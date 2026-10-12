@@ -136,7 +136,6 @@ static inline std::vector<Combo> loadConfig(void) {
   json config;
   cfgFile >> config;
   std::vector<Combo> combosLoad;
-  std::vector<std::string> commands;
   debounceMs = config["sleep"]["debounceMs"].get<int>();
   for (auto &combo : config["combos"]) {
     uint16_t mods = 0;
@@ -147,10 +146,9 @@ static inline std::vector<Combo> loadConfig(void) {
       if (mask) { mods |= mask; }
       else { ks = XStringToKeysym(k.c_str()); }
     }
-    commands = combo["commands"].get<std::vector<std::string>>();
     xcb_keycode_t *codes = xcb_key_symbols_get_keycode(keysyms, ks);
     if (!codes) { std::cerr << "Invalid key: " << ks << "\n"; continue; }
-    combosLoad.push_back({combo["name"], mods, codes[0], commands});
+    combosLoad.push_back({combo["name"], mods, codes[0], combo["commands"].get<std::vector<std::string>>()});
     free(codes);
   }
   return combosLoad;
