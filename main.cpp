@@ -57,7 +57,7 @@ using json = nlohmann::json;
 namespace fs = std::filesystem;
 struct Combo {
   std::vector<std::string> keys;
-  std::string command;
+  std::vector<std::string> commands;
 };
 static std::vector<Combo> combos;
 static std::map<std::string, int> keycodes;
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
     for (auto &combo : combos) {
       bool match = true;
       for (auto &k : combo.keys) { if (!(GetAsyncKeyState(keycodes[k]) & 0x8000)) { match = false; break; } }
-      if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
+      if (match) { for (const auto &cmd : combo.commands) { launchCommandThread(cmd.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; } }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
       for (auto &combo : combos) {
         bool match = true;
         for (auto &k : combo.keys) { if (!keyState[keycodes[k]]) { match = false; break; } }
-        if (match) { launchCommandThread(combo.command.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; }
+        if (match) { for (const auto &cmd : combo.commands) { launchCommandThread(cmd.c_str()); std::this_thread::sleep_for(std::chrono::milliseconds(debounceMs)); pthread_cancel(runningThreads[x].native_handle()); runningThreads[x].detach(); x++; } }
       }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -125,7 +125,7 @@ static inline void loadConfig(void) {
   for (auto &c : cfg["combos"]) {
     Combo combo;
     combo.keys = c["keys"].get<std::vector<std::string>>();
-    combo.command = c["command"].get<std::string>();
+    if (c["commands"].is_array()) { combo.commands = c["commands"].get<std::vector<std::string>>(); }
     combos.push_back(combo);
   }
   for (auto &kv : cfg["keycodes"].items()) {
