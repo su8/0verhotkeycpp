@@ -26,7 +26,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: make -j8
-      run: make -j8
     - name: make BSD -j8
       run: make BSD -j8
