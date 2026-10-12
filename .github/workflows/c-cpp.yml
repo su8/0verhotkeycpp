@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  job1:
+  ubuntu:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +20,7 @@ jobs:
       run: make XCB -j8
     - name: make BSD -j8
       run: make BSD -j8
-  jobs2:
+  macos:
 
     runs-on: macos-latest
 
